@@ -1,6 +1,7 @@
 import {
   DEFAULT_MODEL,
   DEFAULT_BLOCKED_SITES,
+  DEFAULT_USER_INSTRUCTIONS,
   MODEL_CHOICES,
   STORAGE_KEYS as AGENT_KEYS,
   type HomepageModel,
@@ -18,6 +19,7 @@ export const KEYS = {
   homepage: "homepageData",
   systemPrompt: "systemPrompt",
   blockedSites: "blockedSites",
+  readingList: "readingList",
   model: "model",
   autoRebuild: "autoRebuild",
   /** ISO timestamp of the last auto-build *attempted* (success or not). */
@@ -38,6 +40,8 @@ export interface Settings {
   apiKey: string | null;
   systemPrompt: string;
   blockedSites: string[];
+  /** URLs read on every build, on top of whatever history suggests. */
+  readingList: string[];
   model: HomepageModel;
   /** Unset means on — auto-rebuild is opt-out. */
   autoRebuild: boolean;
@@ -63,6 +67,7 @@ export async function loadSettings(): Promise<Settings> {
     KEYS.apiKey,
     KEYS.systemPrompt,
     KEYS.blockedSites,
+    KEYS.readingList,
     KEYS.model,
     KEYS.autoRebuild,
     KEYS.rebuildIntervalHours,
@@ -70,8 +75,10 @@ export async function loadSettings(): Promise<Settings> {
   const model = s[KEYS.model] as string | undefined;
   return {
     apiKey: (s[KEYS.apiKey] as string | undefined) ?? null,
-    systemPrompt: (s[KEYS.systemPrompt] as string | undefined) ?? "",
+    // Unset means a fresh install; a deliberately emptied box is "" and stays empty.
+    systemPrompt: (s[KEYS.systemPrompt] as string | undefined) ?? DEFAULT_USER_INSTRUCTIONS,
     blockedSites: (s[KEYS.blockedSites] as string[] | undefined) ?? [...DEFAULT_BLOCKED_SITES],
+    readingList: (s[KEYS.readingList] as string[] | undefined) ?? [],
     // Fall back if a stored model is no longer offered.
     model: MODEL_CHOICES.find((m) => m.id === model)?.id ?? DEFAULT_MODEL,
     autoRebuild: s[KEYS.autoRebuild] !== false,
@@ -79,7 +86,7 @@ export async function loadSettings(): Promise<Settings> {
   };
 }
 
-export async function saveSetting<K extends "apiKey" | "systemPrompt" | "blockedSites" | "model" | "autoRebuild" | "rebuildIntervalHours">(
+export async function saveSetting<K extends "apiKey" | "systemPrompt" | "blockedSites" | "readingList" | "model" | "autoRebuild" | "rebuildIntervalHours">(
   key: K,
   value: Settings[K],
 ): Promise<void> {

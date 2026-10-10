@@ -38,6 +38,21 @@ export function normalizeBlockList(lines: string[]): string[] {
   return [...new Set(hosts)];
 }
 
+/** Accept bare hosts or full URLs, one per line; keep http(s) only, deduped, in order. */
+export function normalizeReadingList(lines: string[]): string[] {
+  const urls = lines.flatMap((line) => {
+    const value = line.trim();
+    if (!value || value.startsWith("#")) return [];
+    try {
+      const url = new URL(/^[a-z][a-z0-9+.-]*:/i.test(value) ? value : `https://${value}`);
+      return url.protocol === "http:" || url.protocol === "https:" ? [url.href] : [];
+    } catch {
+      return [];
+    }
+  });
+  return [...new Set(urls)];
+}
+
 /** Loopback, private and link-local addresses, and names only a local network resolves. */
 export function isPrivateHost(host: string): boolean {
   if (host.startsWith("[")) {

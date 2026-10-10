@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type Anthropic from "@anthropic-ai/sdk";
-import { isBlocked, normalizeBlockList, runHomepageBuild, type BrowserBridge, type KVStore } from "@homepage/agent-core";
+import { isBlocked, normalizeBlockList, runHomepageBuild, type BrowserBridge, type KVStore, type RunOptions } from "@homepage/agent-core";
 import { fixtureHistory } from "./node-bridge";
 
 test("normalizes pasted hosts and URLs", () => {
@@ -22,8 +22,9 @@ test("matches hosts and subdomains without matching lookalikes", () => {
 });
 
 /** Exercise live and replayed tool dispatch without a network or browser. */
-async function runTools(urls: string[], blockedSites?: string[] | (() => Promise<string[]>), resume = false, afterHistory?: () => void, scrape?: BrowserBridge["getPageHtml"]) {
+async function runTools(urls: string[], blockedSites?: string[] | (() => Promise<string[]>), resume = false, afterHistory?: () => void, scrape?: BrowserBridge["getPageHtml"], extra: Partial<RunOptions> = {}) {
   const results: any[] = [];
+  const kickoffs: string[] = [];
   const uploads: string[] = [];
   const calls: string[][] = [];
   const logs: string[] = [];
@@ -33,7 +34,7 @@ async function runTools(urls: string[], blockedSites?: string[] | (() => Promise
   ];
   async function* stream() { if (!resume) yield* events; }
   const client = { beta: {
-    agents: { retrieve: async () => ({}) },
+    agents: { retrieve: async () => ({}), update: async () => ({}) },
     environments: { retrieve: async () => ({}) },
     sessions: {
       create: async () => ({ id: "session" }),
@@ -43,6 +44,7 @@ async function runTools(urls: string[], blockedSites?: string[] | (() => Promise
         stream: async () => stream(),
         list: async function* () { if (resume) yield* events; },
         send: async (_id: string, body: any) => {
+          for (const e of body.events) if (e.type === "user.message") kickoffs.push(e.content[0].text);
           const toolResults = body.events.filter((e: any) => e.type === "user.custom_tool_result");
           results.push(...toolResults);
           if (toolResults.some((e: any) => e.custom_tool_use_id === "history")) afterHistory?.();
@@ -64,8 +66,8 @@ async function runTools(urls: string[], blockedSites?: string[] | (() => Promise
     getHistory: async () => ({ sites: fixtureHistory(), totalSitesSeen: fixtureHistory().length }),
     getPageHtml: scrape ?? (async ({ urls }) => { calls.push(urls); return { pages: [], failed: urls.map(url => ({ url, reason: "unavailable" })) }; }),
   };
-  await runHomepageBuild({ client, store, bridge, blockedSites, resumeSessionId: resume ? "session" : undefined, callbacks: { onLog: line => logs.push(line) } });
-  return { results, calls, logs, uploads };
+  await runHomepageBuild({ client, store, bridge, blockedSites, resumeSessionId: resume ? "session" : undefined, callbacks: { onLog: line => logs.push(line) }, ...extra });
+  return { results, calls, logs, uploads, kickoffs };
 }
 
 test("filters history before capping and excludes blocked sites from the count", async () => {
@@ -146,4 +148,13 @@ test("drops pages that redirected to a blocked host before uploading them", asyn
   expect(out.pages.map((p: any) => p.url)).toEqual(["https://public.test/"]);
   expect(out.failed).toEqual([{ url: redirector, reason: "blocked by the user's settings" }]);
   expect(JSON.stringify(out)).not.toContain("Inbox");
+});
+
+test("keeps blocked and private hosts off the reading list the agent is given", async () => {
+  const readingList = ["news.ycombinator.com", "https://mail.google.com/mail/u/0/", "http://192.168.1.10/"];
+  const { kickoffs } = await runTools([], ["mail.google.com"], false, undefined, undefined, { readingList });
+  expect(kickoffs).toHaveLength(1);
+  expect(kickoffs[0]).toContain("- https://news.ycombinator.com/");
+  expect(kickoffs[0]).not.toContain("mail.google.com");
+  expect(kickoffs[0]).not.toContain("192.168");
 });

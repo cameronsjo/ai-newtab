@@ -62,7 +62,8 @@ you open.
 
 Click **⚙️ Settings** on the new tab.
 
-**Instructions.** Anything you write here goes into every build and takes priority
+**Instructions.** A fresh install starts with a morning-newspaper brief you can
+rewrite or clear. Anything you write here goes into every build and takes priority
 over the agent's own defaults. This box sets both the content and the look:
 
 | You write | You get |
@@ -74,6 +75,13 @@ over the agent's own defaults. This box sets both the content and the look:
 | *"Skip sports and politics. Always show the weather and my next three calendar events."* | Your rules, every day |
 
 Click **Save & rebuild** to apply them right away.
+
+**Reading list.** Pages the agent reads on every build, one per line (bare hosts
+like `news.ycombinator.com` or full URLs like `https://www.reddit.com/r/ClaudeAI/`).
+They take up to 8 slots per build and history fills the rest; with more than 8,
+the agent picks the ones most likely to have something new. The block list still
+wins: a blocked or local-network entry is never read. You can set this before your
+first build with **⚙️ Settings first**.
 
 **Sites the agent never reads.** Enter one host per line; subdomains are included,
 and `*.example.com` is supported. The editable defaults include common webmail,

@@ -30,6 +30,7 @@ async function main() {
     bridge: nodeBridge,
     store,
     userSystemPrompt: process.env.HOMEPAGE_PROMPT,
+    readingList: process.env.HOMEPAGE_READING_LIST?.split(","),
     callbacks: {
       onPhase: (phase, detail) => {
         if (phase !== lastPhase) {

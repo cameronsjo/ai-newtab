@@ -1,7 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { buildHistoryDigest, slugifyUrl } from "./history-digest";
 import { OUTPUT_PATH, buildKickoffMessage } from "./prompt";
-import { DEFAULT_BLOCKED_SITES, isAllowedUrl, isBlocked, normalizeBlockList } from "./site-filter";
+import { DEFAULT_BLOCKED_SITES, isAllowedUrl, isBlocked, normalizeBlockList, normalizeReadingList } from "./site-filter";
 import { DEFAULTS } from "./schemas";
 import { STORAGE_KEYS, ensureAgent, ensureEnvironment, type HomepageModel } from "./setup";
 import type {
@@ -35,6 +35,8 @@ export interface RunOptions {
   bridge: BrowserBridge;
   store: KVStore;
   userSystemPrompt?: string;
+  /** URLs the agent should read on every build. Blocked hosts are dropped before the model sees them. */
+  readingList?: string[];
   /**
    * Hosts the tools must never read. A getter is re-read before every tool call,
    * so a list saved mid-build applies to the rest of that build.
@@ -203,6 +205,7 @@ export async function runHomepageBuild(opts: RunOptions): Promise<HomepageBuildR
                   text: buildKickoffMessage({
                     now: opts.now ?? new Date(),
                     userSystemPrompt: opts.userSystemPrompt,
+                    readingList: await allowedReadingList(opts),
                   }),
                 },
               ],
@@ -260,6 +263,15 @@ export async function runHomepageBuild(opts: RunOptions): Promise<HomepageBuildR
 // ---------------------------------------------------------------------------
 // tool implementations
 // ---------------------------------------------------------------------------
+
+/** The reading list minus anything the block list rules out, so the model is never told to fetch it. */
+async function allowedReadingList(opts: RunOptions): Promise<string[]> {
+  if (!opts.readingList?.length) return [];
+  const blocked = normalizeBlockList(
+    (typeof opts.blockedSites === "function" ? await opts.blockedSites() : opts.blockedSites) ?? DEFAULT_BLOCKED_SITES,
+  );
+  return normalizeReadingList(opts.readingList).filter((url) => isAllowedUrl(url, blocked));
+}
 
 async function runGetHistory(
   event: CustomToolUse,
