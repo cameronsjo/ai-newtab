@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { MODEL_CHOICES, normalizeBlockList, type HomepageModel } from "@homepage/agent-core";
+import { MODEL_CHOICES, normalizeBlockList, normalizeReadingList, type HomepageModel } from "@homepage/agent-core";
 import { REBUILD_INTERVAL_CHOICES } from "@/lib/auto-rebuild";
 import { btn } from "./ui";
 
 export function SettingsModal({
   initialPrompt,
   blockedSites,
+  readingList,
   model,
   onChangeModel,
   autoRebuild,
@@ -17,6 +18,7 @@ export function SettingsModal({
 }: {
   initialPrompt: string;
   blockedSites: string[];
+  readingList: string[];
   model: HomepageModel;
   onChangeModel: (next: HomepageModel) => void;
   autoRebuild: boolean;
@@ -24,10 +26,11 @@ export function SettingsModal({
   intervalHours: number;
   onChangeInterval: (next: number) => void;
   onClose: () => void;
-  onSave: (prompt: string, blockedSites: string[]) => void;
+  onSave: (prompt: string, blockedSites: string[], readingList: string[]) => void;
 }) {
   const [draft, setDraft] = useState(initialPrompt);
   const [blockedDraft, setBlockedDraft] = useState(blockedSites.join("\n"));
+  const [readingDraft, setReadingDraft] = useState(readingList.join("\n"));
 
   return (
     <div
@@ -51,6 +54,7 @@ export function SettingsModal({
           placeholder="e.g. 'Focus on tech news and Rust releases', 'Always surface unread GitHub PRs first'"
           style={{
             width: "100%",
+            boxSizing: "border-box",
             minHeight: 200,
             padding: 12,
             fontSize: 14,
@@ -59,6 +63,20 @@ export function SettingsModal({
             fontFamily: "inherit",
           }}
         />
+        <label style={{ display: "block", marginTop: 16, color: "#333", fontSize: 14 }}>
+          Reading list
+          <textarea
+            value={readingDraft}
+            onChange={(e) => setReadingDraft(e.target.value)}
+            aria-describedby="reading-list-help"
+            placeholder={"news.ycombinator.com\nhttps://www.reddit.com/r/ClaudeAI/\nhttps://github.com/notifications"}
+            style={{ width: "100%", boxSizing: "border-box", minHeight: 120, marginTop: 8, padding: 12, fontSize: 14, borderRadius: 4, border: "1px solid #ddd", fontFamily: "inherit" }}
+          />
+        </label>
+        <p id="reading-list-help" style={{ color: "#888", fontSize: 12, margin: "6px 0 0" }}>
+          Pages read on every build, one per line. Up to 8 fit in one build; the rest of the slots
+          come from your history. With more than 8, the agent picks the freshest each time.
+        </p>
         <label style={{ display: "block", marginTop: 16, color: "#333", fontSize: 14 }}>
           Sites the agent never reads
           <textarea
@@ -141,7 +159,7 @@ export function SettingsModal({
           >
             Cancel
           </button>
-          <button onClick={() => onSave(draft, normalizeBlockList(blockedDraft.split("\n")))} style={btn}>
+          <button onClick={() => onSave(draft, normalizeBlockList(blockedDraft.split("\n")), normalizeReadingList(readingDraft.split("\n")))} style={btn}>
             Save &amp; rebuild
           </button>
         </div>

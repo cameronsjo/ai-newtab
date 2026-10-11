@@ -16,6 +16,7 @@ export default function App() {
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [systemPrompt, setSystemPrompt] = useState("");
   const [blockedSites, setBlockedSites] = useState<string[]>(DEFAULT_BLOCKED_SITES);
+  const [readingList, setReadingList] = useState<string[]>([]);
   const [model, setModel] = useState<HomepageModel>(DEFAULT_MODEL);
   const [autoRebuild, setAutoRebuild] = useState(true);
   const [intervalHours, setIntervalHours] = useState(DEFAULT_REBUILD_INTERVAL_HOURS);
@@ -49,6 +50,7 @@ export default function App() {
         setApiKey(settings.apiKey);
         setSystemPrompt(settings.systemPrompt);
         setBlockedSites(settings.blockedSites);
+        setReadingList(settings.readingList);
         setModel(settings.model);
         setAutoRebuild(settings.autoRebuild);
         setIntervalHours(settings.rebuildIntervalHours ?? DEFAULT_REBUILD_INTERVAL_HOURS);
@@ -66,9 +68,14 @@ export default function App() {
   }, []);
 
   const savePrompt = useCallback(
-    async (prompt: string, sites: string[]) => {
-      await Promise.all([saveSetting("systemPrompt", prompt), saveSetting("blockedSites", sites)]);
+    async (prompt: string, sites: string[], reading: string[]) => {
+      await Promise.all([
+        saveSetting("systemPrompt", prompt),
+        saveSetting("blockedSites", sites),
+        saveSetting("readingList", reading),
+      ]);
       setBlockedSites(sites);
+      setReadingList(reading);
       setSystemPrompt(prompt);
       setShowSettings(false);
       setRenderedCode(null);
@@ -90,6 +97,23 @@ export default function App() {
     setIntervalHours(next);
     await saveSetting("rebuildIntervalHours", next);
   }, []);
+
+  // Reachable before the first build too, so the reading list can shape it.
+  const settingsModal = showSettings && (
+    <SettingsModal
+      initialPrompt={systemPrompt}
+      blockedSites={blockedSites}
+      readingList={readingList}
+      model={model}
+      onChangeModel={changeModel}
+      autoRebuild={autoRebuild}
+      onToggleAutoRebuild={toggleAutoRebuild}
+      intervalHours={intervalHours}
+      onChangeInterval={changeInterval}
+      onClose={() => setShowSettings(false)}
+      onSave={savePrompt}
+    />
+  );
 
   if (loading) return <div style={{ padding: 20, textAlign: "center" }}>Loading…</div>;
   if (!apiKey) return <ApiKeySetup onSave={saveKey} />;
@@ -125,7 +149,14 @@ export default function App() {
               Resume interrupted build
             </button>
           )}
+          <button
+            style={{ ...btn, backgroundColor: "white", color: "#333", border: "1px solid #ddd" }}
+            onClick={() => setShowSettings(true)}
+          >
+            ⚙️ Settings first
+          </button>
         </div>
+        {settingsModal}
       </div>
     );
   }
@@ -205,20 +236,7 @@ export default function App() {
 
       <HomepagePreview code={renderedCode} />
 
-      {showSettings && (
-        <SettingsModal
-          initialPrompt={systemPrompt}
-          blockedSites={blockedSites}
-          model={model}
-          onChangeModel={changeModel}
-          autoRebuild={autoRebuild}
-          onToggleAutoRebuild={toggleAutoRebuild}
-          intervalHours={intervalHours}
-          onChangeInterval={changeInterval}
-          onClose={() => setShowSettings(false)}
-          onSave={savePrompt}
-        />
-      )}
+      {settingsModal}
     </div>
   );
 }

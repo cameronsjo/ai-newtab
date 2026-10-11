@@ -24,6 +24,39 @@ terminal, a zine.
 
 ---
 
+## Hosted: one page for every browser and machine
+
+If you want the same page at home and at work, in any browser, skip the
+extension. A small container on a home server builds the page every morning
+from a reading list and pushes it to this repo's `gh-pages` branch, and every
+browser just opens the GitHub Pages URL.
+
+The trade-off: a server has no browsing history and isn't signed in to
+anything, so it reads only the pages you list, fetched anonymously. Public
+sites (Hacker News, blogs, old.reddit.com, release notes) work. X profiles work
+when the container can reach an [RSSHub](https://docs.rsshub.app) with an X
+token: list them as `https://x.com/<handle>` and set `RSSHUB_URL`.
+
+- **What it reads:** `hosted/reading-list.txt`. **How it looks:**
+  `hosted/instructions.md`. Both are baked into the image, which
+  `.github/workflows/image.yml` publishes to `ghcr.io/<you>/<repo>:main` on
+  every push to `main`.
+- **Running it:** `docker/Dockerfile`. It needs `ANTHROPIC_API_KEY`,
+  `PAGES_REPO` (`owner/repo`) and `DEPLOY_KEY_B64` (a base64-encoded deploy key
+  with write access). Optional: `RSSHUB_URL`, `BUILD_AT` (default `06:00`,
+  container local time), `RUN_ON_START=true`, `HOMEPAGE_MODEL`. Mount `/data`
+  to keep the agent's cached IDs between builds.
+- **Serving it:** Settings > Pages > Deploy from a branch > `gh-pages`. A failed
+  build leaves the previous page up.
+- **Opening it:** point your browsers at `https://<you>.github.io/<repo>/`.
+  Browsers won't let you set the new tab page to a URL, so
+  [`apps/newtab-redirect`](apps/newtab-redirect/README.md) is a tiny extension
+  that does only that (Safari can do it natively).
+
+The page is public to anyone with the URL (it's marked `noindex`), but it only
+contains what it read from public pages. Build it locally with
+`ANTHROPIC_API_KEY=… pnpm site:build`; the output lands in `site/`.
+
 ## Install
 
 You need Chrome (or another Chromium browser), [Node.js](https://nodejs.org) 20+,
@@ -62,7 +95,8 @@ you open.
 
 Click **⚙️ Settings** on the new tab.
 
-**Instructions.** Anything you write here goes into every build and takes priority
+**Instructions.** A fresh install starts with a morning-newspaper brief you can
+rewrite or clear. Anything you write here goes into every build and takes priority
 over the agent's own defaults. This box sets both the content and the look:
 
 | You write | You get |
@@ -74,6 +108,13 @@ over the agent's own defaults. This box sets both the content and the look:
 | *"Skip sports and politics. Always show the weather and my next three calendar events."* | Your rules, every day |
 
 Click **Save & rebuild** to apply them right away.
+
+**Reading list.** Pages the agent reads on every build, one per line (bare hosts
+like `news.ycombinator.com` or full URLs like `https://www.reddit.com/r/ClaudeAI/`).
+They take up to 8 slots per build and history fills the rest; with more than 8,
+the agent picks the ones most likely to have something new. The block list still
+wins: a blocked or local-network entry is never read. You can set this before your
+first build with **⚙️ Settings first**.
 
 **Sites the agent never reads.** Enter one host per line; subdomains are included,
 and `*.example.com` is supported. The editable defaults include common webmail,

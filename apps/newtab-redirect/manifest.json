@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "Today (new tab)",
+  "description": "Opens your hosted daily homepage in every new tab.",
+  "version": "1.0.0",
+  "chrome_url_overrides": { "newtab": "newtab.html" },
+  "browser_specific_settings": { "gecko": { "id": "today-newtab@cameronsjo.github.io" } }
+}

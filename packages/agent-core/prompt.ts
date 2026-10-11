@@ -75,9 +75,21 @@ failed at its only job.
 When you have written the file, reply with a two-sentence summary of what you
 built and why. Do not paste the component source into your reply.`;
 
+/**
+ * Starting instructions for a fresh install, so the first build already has a
+ * look. They fill the Settings box and stay fully editable there.
+ */
+export const DEFAULT_USER_INSTRUCTIONS = `A morning newspaper front page. Serif type, a big masthead with today's date and edition, a lead story with a drop cap, a column of briefs, and a "Dates for the diary" box for anything upcoming.
+Lead with what's genuinely new since yesterday. Keep each blurb to two or three sentences and say why it matters to me.`;
+
+/** Cap shared with GET_PAGE_HTML_SCHEMA.urls.maxItems. */
+export const MAX_PAGES_PER_BUILD = 8;
+
 export interface KickoffInput {
   now: Date;
   userSystemPrompt?: string;
+  /** Pages the user always wants read, whatever their history says. */
+  readingList?: string[];
 }
 
 export function getTimeOfDay(date: Date): "morning" | "afternoon" | "evening" | "night" {
@@ -88,7 +100,20 @@ export function getTimeOfDay(date: Date): "morning" | "afternoon" | "evening" | 
   return "night";
 }
 
-export function buildKickoffMessage({ now, userSystemPrompt }: KickoffInput): string {
+function readingListBlock(readingList: string[] | undefined): string {
+  if (!readingList?.length) return "";
+  const fits = readingList.length <= MAX_PAGES_PER_BUILD;
+  return [
+    ``,
+    `The user's reading list (pages they always want covered):`,
+    ...readingList.map((url) => `- ${url}`),
+    fits
+      ? `Include every one of these in your getPageHtml call. They count toward the ${MAX_PAGES_PER_BUILD}-page cap; fill any remaining slots from history as usual.`
+      : `That is more than the ${MAX_PAGES_PER_BUILD}-page cap, so choose the ${MAX_PAGES_PER_BUILD} most likely to have something new right now, and favour the ones you'd otherwise skip on the next build.`,
+  ].join("\n");
+}
+
+export function buildKickoffMessage({ now, userSystemPrompt, readingList }: KickoffInput): string {
   const dateLine = now.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -105,6 +130,7 @@ export function buildKickoffMessage({ now, userSystemPrompt }: KickoffInput): st
     userSystemPrompt?.trim()
       ? `\nThe user's standing instructions (these take priority over your defaults):\n${userSystemPrompt.trim()}`
       : ``,
+    readingListBlock(readingList),
     ``,
     `Start with getHistory, then scrape, then write ${OUTPUT_PATH}.`,
   ]
