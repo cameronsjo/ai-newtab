@@ -1,5 +1,5 @@
 # Pages the daily hosted build reads, one per line. Up to 8 fit in one build;
-# with more, the agent picks the freshest each day.
+# with more (there are 11 here), the agent picks the freshest each day.
 # The server fetches anonymously from a datacenter, so logged-in pages come back
 # as login walls. old.reddit.com holds up better than new Reddit, and joining
 # subreddits with + (r/a+b+c) reads several in one slot.
@@ -12,7 +12,10 @@ https://old.reddit.com/r/ClaudeAI+LocalLLaMA+MachineLearning/top/?t=day
 https://old.reddit.com/r/netsec+cybersecurity+blueteamsec/top/?t=day
 https://old.reddit.com/r/devops+sre+sysadmin+selfhosted+homelab/top/?t=day
 
-# AI security
+# AI security (AI news desks are screened by the AI Security rules in instructions.md)
+https://arstechnica.com/ai/
+https://techcrunch.com/category/artificial-intelligence/
+https://www.theverge.com/ai-artificial-intelligence
 https://simonwillison.net/
 https://embracethered.com/blog/
 https://www.bleepingcomputer.com/
