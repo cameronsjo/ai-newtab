@@ -1,0 +1,9 @@
+# Pages the daily hosted build reads, one per line. Up to 8 fit in one build.
+# The server fetches them anonymously, so logged-in pages (X, LinkedIn, GitHub
+# notifications) come back as login walls. Old Reddit and RSS feeds tend to
+# survive datacenter IPs better than the new Reddit front end.
+news.ycombinator.com
+https://lobste.rs/
+https://old.reddit.com/r/ClaudeAI/
+https://www.anthropic.com/news
+https://simonwillison.net/

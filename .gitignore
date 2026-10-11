@@ -19,3 +19,7 @@ harness/out/
 .claude/settings.local.json
 .DS_Store
 *.log
+
+# Hosted build output
+site/
+harness/.site-build-*/
