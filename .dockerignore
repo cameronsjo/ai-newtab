@@ -1,0 +1,9 @@
+**/node_modules
+**/.output
+**/.wxt
+site
+harness/out
+harness/.agent-state.json
+harness/.site-build-*
+.env
+.git

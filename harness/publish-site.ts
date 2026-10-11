@@ -3,7 +3,8 @@
  * the result, and write a static site to site/ for GitHub Pages.
  *
  * Runs on a server with no browser, so there is no history and pages are
- * fetched anonymously. The reading list stands in for both.
+ * fetched anonymously. The reading list stands in for both. With RSSHUB_URL
+ * set, x.com profile pages are read through that RSSHub (see rsshub.ts).
  *
  * Run: pnpm site:build          (needs ANTHROPIC_API_KEY)
  *      pnpm site:build <file>   (skip the agent; render an existing .tsx)
@@ -14,6 +15,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { FileKVStore, STATE_PATH, nodeBridge } from "./node-bridge";
 import { renderSite } from "./render";
+import { withRsshub } from "./rsshub";
 
 const ROOT = join(import.meta.dir, "..");
 const SITE_DIR = join(ROOT, "site");
@@ -23,12 +25,15 @@ and getPageHtml fetches pages anonymously, so a login wall means that page is un
 Build the page from the reading list.`;
 
 /** No browser, so no history: the reading list is the whole picture. */
-const hostedBridge: BrowserBridge = {
-  async getHistory() {
-    return { sites: [], totalSitesSeen: 0 };
+const hostedBridge: BrowserBridge = withRsshub(
+  {
+    async getHistory() {
+      return { sites: [], totalSitesSeen: 0 };
+    },
+    getPageHtml: nodeBridge.getPageHtml,
   },
-  getPageHtml: nodeBridge.getPageHtml,
-};
+  process.env.RSSHUB_URL,
+);
 
 async function buildWithAgent(): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;

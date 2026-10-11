@@ -27,27 +27,31 @@ terminal, a zine.
 ## Hosted: one page for every browser and machine
 
 If you want the same page at home and at work, in any browser, skip the
-extension. A GitHub Action builds the page every morning from a reading list
-and publishes it to GitHub Pages, and every browser just opens that URL.
+extension. A small container on a home server builds the page every morning
+from a reading list and pushes it to this repo's `gh-pages` branch, and every
+browser just opens the GitHub Pages URL.
 
 The trade-off: a server has no browsing history and isn't signed in to
 anything, so it reads only the pages you list, fetched anonymously. Public
-sites (Hacker News, blogs, old.reddit.com, release notes) work; logged-in
-feeds don't.
+sites (Hacker News, blogs, old.reddit.com, release notes) work. X profiles work
+when the container can reach an [RSSHub](https://docs.rsshub.app) with an X
+token: list them as `https://x.com/<handle>` and set `RSSHUB_URL`.
 
-1. Edit **`hosted/reading-list.txt`** (pages to read) and
-   **`hosted/instructions.md`** (the look and what to emphasise). Pushing a
-   change to either rebuilds the page.
-2. In the repo's **Settings > Secrets and variables > Actions**, add the secret
-   `ANTHROPIC_API_KEY`. Optionally add the variables `HOMEPAGE_TZ` (for example
-   `America/Chicago`) and `HOMEPAGE_MODEL` (for example `claude-haiku-5-5`).
-3. In **Settings > Pages**, set the source to **GitHub Actions**.
-4. Run **Actions > Daily homepage > Run workflow** once. After that it runs
-   daily at 11:00 UTC. A failed run leaves yesterday's page up.
-5. Point your browsers at `https://<you>.github.io/<repo>/`. Browsers won't let
-   you set the new tab page to a URL, so
-   [`apps/newtab-redirect`](apps/newtab-redirect/README.md) is a tiny
-   extension that does only that (Safari can do it natively).
+- **What it reads:** `hosted/reading-list.txt`. **How it looks:**
+  `hosted/instructions.md`. Both are baked into the image, which
+  `.github/workflows/image.yml` publishes to `ghcr.io/<you>/<repo>:main` on
+  every push to `main`.
+- **Running it:** `docker/Dockerfile`. It needs `ANTHROPIC_API_KEY`,
+  `PAGES_REPO` (`owner/repo`) and `DEPLOY_KEY_B64` (a base64-encoded deploy key
+  with write access). Optional: `RSSHUB_URL`, `BUILD_AT` (default `06:00`,
+  container local time), `RUN_ON_START=true`, `HOMEPAGE_MODEL`. Mount `/data`
+  to keep the agent's cached IDs between builds.
+- **Serving it:** Settings > Pages > Deploy from a branch > `gh-pages`. A failed
+  build leaves the previous page up.
+- **Opening it:** point your browsers at `https://<you>.github.io/<repo>/`.
+  Browsers won't let you set the new tab page to a URL, so
+  [`apps/newtab-redirect`](apps/newtab-redirect/README.md) is a tiny extension
+  that does only that (Safari can do it natively).
 
 The page is public to anyone with the URL (it's marked `noindex`), but it only
 contains what it read from public pages. Build it locally with

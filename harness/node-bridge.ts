@@ -10,8 +10,11 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { BrowserBridge, KVStore, RawSiteMetadata } from "@homepage/agent-core";
 
-/** Harness state (cached agent/environment IDs, active session) and output, next to these scripts. */
-export const STATE_PATH = join(import.meta.dir, ".agent-state.json");
+/**
+ * Harness state (cached agent/environment IDs, active session) and output, next to these
+ * scripts. AGENT_STATE_PATH moves the state onto a volume when running in a container.
+ */
+export const STATE_PATH = process.env.AGENT_STATE_PATH ?? join(import.meta.dir, ".agent-state.json");
 export const OUT_DIR = join(import.meta.dir, "out");
 export const OUT_PATH = join(OUT_DIR, "homepage.tsx");
 
