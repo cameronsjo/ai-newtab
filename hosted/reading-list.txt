@@ -1,5 +1,5 @@
-# Pages the daily hosted build reads, one per line. Up to 8 fit in one build;
-# with more (there are 15 here), the agent picks the freshest each day.
+# Pages the daily hosted build reads, one per line. Up to 16 fit in one build;
+# with more, the agent picks the freshest each day.
 # The server fetches anonymously from a datacenter, so logged-in pages come back
 # as login walls. old.reddit.com holds up better than new Reddit, and joining
 # subreddits with + (r/a+b+c) reads several in one slot.
@@ -27,7 +27,10 @@ https://techcrunch.com/category/artificial-intelligence/
 https://www.theverge.com/ai-artificial-intelligence
 https://simonwillison.net/
 https://embracethered.com/blog/
-https://www.bleepingcomputer.com/
 
-# Ops
-https://thenewstack.io/
+# TLDR newsletters. Each section URL resolves to that edition's newest issue at
+# fetch time (see harness/tldr.ts). InfoSec and DevOps stand in for
+# BleepingComputer and The New Stack, which mostly carried enterprise news.
+https://tldr.tech/ai
+https://tldr.tech/infosec
+https://tldr.tech/devops

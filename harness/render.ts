@@ -64,7 +64,11 @@ export async function renderSite(tsx: string, builtAt: Date): Promise<{ html: st
 <meta name="robots" content="noindex">
 <meta name="built-at" content="${builtAt.toISOString()}">
 <title>Today</title>
-<style>html,body{margin:0}</style>
+<meta name="theme-color" content="#292c33">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>html,body{margin:0;background:#292c33}</style>
 </head>
 <body>
 <div id="root">${markup}</div>
