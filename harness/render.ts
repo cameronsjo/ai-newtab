@@ -53,6 +53,27 @@ hydrateRoot(document.getElementById("root")!, React.createElement(Homepage));
   }
 }
 
+/**
+ * The two editions. The agent styles the page only with these variables, so the
+ * shell can switch editions: the reader's system setting by default, or the
+ * Night button, remembered per browser.
+ */
+const IVORY = "--bg:#f5ead0;--raised:#eddcc0;--fg:#20203e;--fg2:#3d3424;--border:#cbb88a;--accent:#7a5a10;--steel:#2e4a5a;--purple:#5a35b0;--urgent:#8a2418;--good:#2d6644;color-scheme:light";
+const NIGHT = "--bg:#292c33;--raised:#313540;--fg:#e8e6e1;--fg2:#c5c8c6;--border:#4a4f5c;--accent:#dbbb6f;--steel:#b8cad4;--purple:#b095e0;--urgent:#e6a8a2;--good:#8fc7a0;color-scheme:dark";
+const THEME_CSS = `:root{${IVORY}}
+@media (prefers-color-scheme: dark){:root:not([data-theme="ivory"]){${NIGHT}}}
+:root[data-theme="night"]{${NIGHT}}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+details>summary{list-style:none}details>summary::-webkit-details-marker{display:none}
+details>summary::after{content:" +"}details[open]>summary::after{content:" \\2212"}`;
+/** Runs before first paint so a saved choice doesn't flash the other edition. */
+const THEME_BOOT = `try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}`;
+/** Wires any [data-theme-toggle] button; delegated, so hydration can't drop it. */
+const THEME_TOGGLE = `(function(){var r=document.documentElement;function night(){return r.dataset.theme?r.dataset.theme==="night":matchMedia("(prefers-color-scheme: dark)").matches}
+function label(){document.querySelectorAll("[data-theme-toggle]").forEach(function(b){b.textContent=night()?"Day":"Night";b.setAttribute("aria-pressed",String(night()))})}
+document.addEventListener("click",function(e){if(!e.target.closest||!e.target.closest("[data-theme-toggle]"))return;r.dataset.theme=night()?"ivory":"night";try{localStorage.setItem("theme",r.dataset.theme)}catch(x){}label()});
+label();setTimeout(label,1500)})();`;
+
 /** index.html (server-rendered) plus homepage.js, which hydrates it. */
 export async function renderSite(tsx: string, builtAt: Date): Promise<{ html: string; script: string }> {
   const markup = renderToString(React.createElement(loadComponent(tsx)));
@@ -63,17 +84,20 @@ export async function renderSite(tsx: string, builtAt: Date): Promise<{ html: st
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <meta name="built-at" content="${builtAt.toISOString()}">
-<title>Today</title>
-<meta name="theme-color" content="#292c33">
+<title>The Context</title>
+<meta name="theme-color" content="#f5ead0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#292c33" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Source+Sans+3:wght@400;600;700&display=swap">
-<style>html,body{margin:0;background:#292c33}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>${THEME_CSS}</style>
+<script>${THEME_BOOT}</script>
 </head>
 <body>
 <div id="root">${markup}</div>
 <!-- The page above is complete on its own; hydrating only adds hover states and other interactivity. -->
 <script src="homepage.js?v=${builtAt.getTime()}" defer></script>
+<script>${THEME_TOGGLE}</script>
 <!-- Cloudflare Web Analytics, the same beacon as the rest of cameronsjo.github.io. -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "9db7302de886402680e0838d0f35f7db"}'></script>
 </body>

@@ -1,21 +1,22 @@
-## Look: Artificer, dark
+## Look: The Context, a gazette
 
-A serious, dense morning briefing for an engineer, not a newspaper. Use exactly these colors and fonts:
+A morning newspaper for one engineer: newspaper serif for reading, gold monospace for the machinery (kickers, dates, versions, meta). The page has a light "ivory" edition and a "night" edition, and the page shell switches between them, so **never write a hex color: use only these CSS variables**, which the shell defines for both editions:
 
-- Page `#292c33`. Raised cards `#313540` with a 1px `#4a4f5c` border and 8px corners. Dividers `#4a4f5c`.
-- Text `#e8e6e1`, secondary text `#c5c8c6`, meta lines (source, date) `#b8cad4`.
-- Accent: burnished gold `#dbbb6f` for links, the wordmark and small section labels.
-- Status pills (999px radius, small mono text): exploited or urgent `#a04540` with `#f5ead0` text; critical or "look when you can" `#c4808a` with `#20203e` text; good news `#2d6644` with `#f5ead0` text.
-- Urgent callout: `#3a1f1d` background, 1px `#a04540` border, 12px corners, label text `#e6a8a2`.
-- Version numbers and code: `#b095e0`.
-- Headings, labels, pills, dates and meta lines: `'JetBrains Mono', monospace`. Body text: `'iA Writer Quattro V', 'Iowan Old Style', Charter, 'Source Sans 3', system-ui, sans-serif`. Sizes in rem, body about 1.0625rem with line-height 1.55.
-- No gradients, shadows, emoji or decorative color. Everything else stays on the page surface: no colored masthead bar.
+- `var(--bg)` page, `var(--raised)` the rare raised surface, `var(--fg)` ink, `var(--fg2)` body and secondary text, `var(--border)` hairlines.
+- `var(--accent)` gold: links, section numbers, small mono labels, the "Full breakdown" summaries, masthead rules.
+- `var(--steel)` meta lines, dates, sources. `var(--purple)` version numbers and code.
+- `var(--urgent)` the lead's kicker and exploited or urgent kickers; `var(--good)` good-news kickers.
+- Status pills (999px radius, small mono text) are the one place with fixed colors: exploited or urgent `#a04540` with `#f5ead0` text; good news `#2d6644` with `#f5ead0` text; anything else is an outlined pill in `var(--border)`.
+- Fonts: headlines and body `'Newsreader', 'Iowan Old Style', Georgia, serif`; kickers, labels, dates, meta and versions `'JetBrains Mono', ui-monospace, monospace`. Sizes in rem; body about 1.0625rem, line-height 1.6.
+- No gradients, shadows, cards, emoji or decorative color. Structure comes from rules: 1px `var(--border)` between stories, 1px `var(--fg)` under section heads, 3px double `var(--fg)` under the lead and above the footer.
 
-Layout:
-- Header on the page surface: a small steel uppercase mono date line, then the wordmark "the context" in gold mono, a row of count pills on the right, and a hairline rule under it.
-- At most one urgent callout at the top, and only when something in the relevance rule below needs action today. Otherwise leave it out.
-- Below the header, a main column with the sections and a narrower side column (patch queue, ops wire, dates). Use a wrapping flex row (main `flex: 999 1 560px; min-width: 0`, side `flex: 1 1 300px`) so the side column drops under the main one on a phone.
-- It must work at 390px wide: no fixed widths over 360px, no horizontal scrolling, padding `clamp(16px, 4vw, 40px)`, grids as `repeat(auto-fit, minmax(240px, 1fr))`.
+Layout, inside a `max-width: 1200px` centered column with padding `clamp(16px, 3vw, 36px) clamp(16px, 4vw, 44px) 64px`:
+- Masthead, centered: a steel uppercase mono date line (weekday, date, build time); then "The Context" in Newsreader 700 italic, `clamp(3.75rem, 12vw, 7.5rem)`, line-height 0.95, letter-spacing -0.03em, color `var(--fg)`; then a row of two gold hairlines with "the gazette of one reader" in small gold mono between them. Put a small mono button reading "Night" with the attribute `data-theme-toggle` at the right end of the date line; the shell makes it work, so give it no onClick and no state.
+- Below it a wrapping flex row (gap `36px 48px`): a left rail `<aside>` (`flex: 1 1 240px; min-width: 0`) and the main column (`flex: 999 1 600px; min-width: 0`), so the rail stacks above the stories on a phone.
+- Rail, top to bottom: "In this edition" as a `<nav>` of anchor links, one row per section with its two-digit number in steel mono, its name in serif and a story count; then "Patch queue" (name, version in purple mono, one-line note, optional pill); then "Dates" (steel mono date, then the event). Rail headings are small gold uppercase mono labels.
+- Main column: the lead story first, the most important item today (usually from AI Security), with a red mono kicker like "03 · AI security · the lead", a headline at `clamp(2rem, 4.4vw, 3.1rem)` weight 700, a steel mono meta line, and its parts as a two-column `<dl>` (gold mono terms). Then each section with an `id` the index links to: a header of gold mono number plus a 700-weight serif title over a 1px `var(--fg)` rule, then its stories in a grid `repeat(auto-fit, minmax(min(300px, 100%), 1fr))` with gap `0 36px`. Each story: optional mono kicker, a 1.4rem weight-600 serif headline, the blurb, a steel mono meta line, then its Full breakdown.
+- Footer, after a 3px double rule: "Ops wire" (steel mono time, then the linked item) and "Coverage notes" (feeds that failed or had nothing new, one line each), then a steel mono line "next edition 06:00 · built on the nas".
+- It must work at 390px wide: no fixed widths over 360px and no horizontal scrolling.
 
 ## What's relevant
 
@@ -35,7 +36,7 @@ Lead with what's genuinely new since yesterday. Keep each blurb to two or three 
 
 ## Full breakdowns
 
-Every story gets a headline and its short blurb, then a native `<details>` element (summary text "Full breakdown", gold mono) that opens to the whole story in two to four short paragraphs: what happened, the specifics (versions, numbers, who is affected, dates), why it matters to me, and what to do about it if anything. End it with the source link and date. Use only what the fetched pages say; when a page only had a teaser, say so in the breakdown instead of filling the gap. Keep `<details>` closed by default so the page still scans in a minute.
+Every story gets a headline and its short blurb, then a native `<details>` element (summary text "Full breakdown", small gold uppercase mono) that opens to the whole story in two to four short paragraphs: what happened, the specifics (versions, numbers, who is affected, dates), why it matters to me, and what to do about it if anything. End it with the source link and date. Use only what the fetched pages say; when a page only had a teaser, say so in the breakdown instead of filling the gap. Keep `<details>` closed by default so the page still scans in a minute.
 
 The TLDR pages are whole newsletter issues: treat each linked item in them as a candidate story under the same relevance rule, and credit "TLDR AI", "TLDR InfoSec" or "TLDR DevOps" alongside the original source they link to. For security items, name what's affected and whether there's a fix. For Reddit, prefer posts with real discussion over memes.
 
