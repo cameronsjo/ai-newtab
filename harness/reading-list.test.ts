@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { buildKickoffMessage, normalizeReadingList } from "@homepage/agent-core";
+import { MAX_PAGES_PER_BUILD, buildKickoffMessage, normalizeReadingList } from "@homepage/agent-core";
 
 describe("normalizeReadingList", () => {
   test("adds a scheme to bare hosts, keeps paths, drops junk and duplicates", () => {
@@ -30,7 +30,7 @@ describe("buildKickoffMessage reading list", () => {
   });
 
   test("asks the agent to choose when the list exceeds the cap", () => {
-    const list = Array.from({ length: 10 }, (_, i) => `https://site${i}.com/`);
-    expect(buildKickoffMessage({ now, readingList: list })).toContain("choose the 8");
+    const list = Array.from({ length: MAX_PAGES_PER_BUILD + 2 }, (_, i) => `https://site${i}.com/`);
+    expect(buildKickoffMessage({ now, readingList: list })).toContain(`choose the ${MAX_PAGES_PER_BUILD}`);
   });
 });

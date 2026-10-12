@@ -4,7 +4,8 @@
  *
  * Runs on a server with no browser, so there is no history and pages are
  * fetched anonymously. The reading list stands in for both. With RSSHUB_URL
- * set, x.com profile pages are read through that RSSHub (see rsshub.ts).
+ * set, x.com profile pages are read through that RSSHub (see rsshub.ts), and
+ * TLDR section pages resolve to their newest issue (see tldr.ts).
  *
  * Run: pnpm site:build          (needs ANTHROPIC_API_KEY)
  *      pnpm site:build <file>   (skip the agent; render an existing .tsx)
@@ -16,6 +17,7 @@ import { join } from "node:path";
 import { FileKVStore, STATE_PATH, nodeBridge } from "./node-bridge";
 import { renderSite } from "./render";
 import { withRsshub } from "./rsshub";
+import { withTldr } from "./tldr";
 
 const ROOT = join(import.meta.dir, "..");
 const SITE_DIR = join(ROOT, "site");
@@ -25,14 +27,16 @@ and getPageHtml fetches pages anonymously, so a login wall means that page is un
 Build the page from the reading list.`;
 
 /** No browser, so no history: the reading list is the whole picture. */
-const hostedBridge: BrowserBridge = withRsshub(
-  {
-    async getHistory() {
-      return { sites: [], totalSitesSeen: 0 };
+const hostedBridge: BrowserBridge = withTldr(
+  withRsshub(
+    {
+      async getHistory() {
+        return { sites: [], totalSitesSeen: 0 };
+      },
+      getPageHtml: nodeBridge.getPageHtml,
     },
-    getPageHtml: nodeBridge.getPageHtml,
-  },
-  process.env.RSSHUB_URL,
+    process.env.RSSHUB_URL,
+  ),
 );
 
 async function buildWithAgent(): Promise<string> {
