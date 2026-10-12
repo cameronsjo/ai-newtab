@@ -74,6 +74,8 @@ export async function renderSite(tsx: string, builtAt: Date): Promise<{ html: st
 <div id="root">${markup}</div>
 <!-- The page above is complete on its own; hydrating only adds hover states and other interactivity. -->
 <script src="homepage.js?v=${builtAt.getTime()}" defer></script>
+<!-- Cloudflare Web Analytics, the same beacon as the rest of cameronsjo.github.io. -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "9db7302de886402680e0838d0f35f7db"}'></script>
 </body>
 </html>
 `;
