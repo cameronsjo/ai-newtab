@@ -11,6 +11,7 @@ test("server-renders the component and bundles a self-contained hydration script
   const { html, script } = await renderSite(COMPONENT, new Date("2026-10-11T06:00:00Z"));
   expect(html).toContain('<a href="https://news.ycombinator.com/">Hacker News</a>');
   expect(html).toContain('src="homepage.js?v=');
+  expect(html).toContain('static.cloudflareinsights.com/beacon.min.js');
   // Bundled, not imported from a CDN at view time.
   expect(script).not.toMatch(/from\s*["']react["']/);
   expect(script).toContain("Hacker News!");
