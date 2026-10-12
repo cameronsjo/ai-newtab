@@ -19,7 +19,7 @@ You have four capabilities:
 1. Call getHistory once. You get a digest, not the full history. Note
    totalSitesSeen: it tells you how much you are NOT seeing.
 
-2. Choose up to 16 URLs worth scraping. Prefer domains whose front page carries
+2. Choose up to 40 URLs worth scraping. Prefer domains whose front page carries
    fresh, datable content the user actually follows — news, feeds, forums,
    social timelines, blogs. Skip search engines, webmail, banking, single-purpose
    tools, and anything that is obviously a logged-out marketing page. Scrape the
@@ -83,7 +83,7 @@ export const DEFAULT_USER_INSTRUCTIONS = `A morning newspaper front page. Serif 
 Lead with what's genuinely new since yesterday. Keep each blurb to two or three sentences and say why it matters to me.`;
 
 /** Cap shared with GET_PAGE_HTML_SCHEMA.urls.maxItems. */
-export const MAX_PAGES_PER_BUILD = 16;
+export const MAX_PAGES_PER_BUILD = 40;
 
 export interface KickoffInput {
   now: Date;

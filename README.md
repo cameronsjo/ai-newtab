@@ -16,7 +16,7 @@ terminal, a zine.
 
 > **Privacy, up front.** To build your homepage, the extension sends a summary of
 > your browsing history (top domains, visit counts, a few page titles) and the
-> cleaned-up HTML of up to 16 pages to the Anthropic API, using your own API key.
+> cleaned-up HTML of up to 40 pages to the Anthropic API, using your own API key.
 > Those pages are loaded in your signed-in browser, so they can include private
 > content. The agent session and every uploaded page are deleted when each build
 > ends. Your API key stays in the extension's local storage. More detail in
@@ -111,7 +111,7 @@ Click **Save & rebuild** to apply them right away.
 
 **Reading list.** Pages the agent reads on every build, one per line (bare hosts
 like `news.ycombinator.com` or full URLs like `https://www.reddit.com/r/ClaudeAI/`).
-They take up to 16 slots per build and history fills the rest; with more than 16,
+They take up to 40 slots per build and history fills the rest; with more than 40,
 the agent picks the ones most likely to have something new. The block list still
 wins: a blocked or local-network entry is never read. You can set this before your
 first build with **⚙️ Settings first**.
@@ -143,7 +143,7 @@ failed build until the next interval, so it never loops.
 - **Cost.** Each build is a single agent session billed to your API key. What it
   costs depends on the model and on how much it reads. Haiku is the cheapest
   choice, and you can turn off automatic rebuilds to build only when you ask.
-- **What it can see.** It ranks the sites in your history and opens up to 16 of
+- **What it can see.** It ranks the sites in your history and opens up to 40 of
   them per build. It skips search engines, webmail, banking and logged-out
   marketing pages. Anything it can't open is reported, not hidden.
 - **Links are real.** Every link on the page comes from a page the agent actually
@@ -156,7 +156,7 @@ failed build until the next interval, so it never loops.
 ## How it works
 
 1. **`getHistory`**: the agent gets a ranked summary of your most-visited domains.
-2. **`getPageHtml`**: it picks up to 16 pages, which the extension opens in a
+2. **`getPageHtml`**: it picks up to 40 pages, which the extension opens in a
    background window, cleans up, and mounts into the agent's sandbox as files.
 3. **`grep` / `read`**: the agent pulls headlines, posts and links out of those
    files inside its sandbox.
