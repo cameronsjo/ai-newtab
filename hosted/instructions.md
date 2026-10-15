@@ -38,7 +38,7 @@ Lead with what's genuinely new since yesterday. Keep each blurb to two or three 
 
 Every story gets a headline and its short blurb. When the fetched pages give you more than the blurb already says, follow it with a native `<details>` element (summary text "Full breakdown", small gold uppercase mono) that opens to the whole story in two to four short paragraphs: what happened, the specifics (versions, numbers, who is affected, dates), why it matters to me, and what to do about it if anything. End it with the source link and date. Use only what the fetched pages say. Keep `<details>` closed by default so the page still scans in a minute.
 
-Only offer a Full breakdown when there is one. If all you had was a headline, a teaser or a newsletter's one-line summary, leave out the `<details>` element entirely: no empty breakdown, and no breakdown that only says the detail wasn't available. Instead, end that story's meta line with "headline only" or "summary only" so I know why there's nothing more.
+Only offer a Full breakdown when there is one. If all you had was a headline, a teaser or a newsletter's one-line summary, leave out the `<details>` element entirely: no empty breakdown, and no breakdown that only says the detail wasn't available. Keep the source link and publication date in that story's meta line, then end it with "headline only" or "summary only" so I know why there's nothing more.
 
 The TLDR pages are whole newsletter issues: treat each linked item in them as a candidate story under the same relevance rule, and credit "TLDR AI", "TLDR InfoSec" or "TLDR DevOps" alongside the original source they link to. For security items, name what's affected and whether there's a fix. For Reddit, prefer posts with real discussion over memes.
 
